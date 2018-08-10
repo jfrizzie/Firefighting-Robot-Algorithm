@@ -1,0 +1,129 @@
+#include <NewPing.h>
+
+//motor values
+const int motor1A = 10;
+const int motor1B = 9;
+const int motor2A = 8;
+const int motor2B = 7;
+
+//ultrasonar sensors (us) trig and echo (E or T) pin values
+const int usEfront = 5;
+const int usTfront = 6;
+const int usEright = 3;
+const int usTright = 4;
+const int usEleft = 12;
+const int usTleft = 11;
+int DistFront;
+int DistRight;
+int DistLeft;
+
+int mDistFront = 200;
+int mDistRight = 200;
+int mDistLeft = 200;
+NewPing sonarFront(usTfront, usEfront, mDistFront);
+NewPing sonarRight(usTright, usEright, mDistRight);
+NewPing sonarLeft(usTleft, usEleft, mDistLeft);
+
+
+//infrared sensor
+const int IR = 1;
+int Value;
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(motor1A, OUTPUT);
+  pinMode(motor1B, OUTPUT);
+  pinMode(motor2A, OUTPUT);
+  pinMode(motor2B, OUTPUT);
+
+}
+
+
+
+void loop() {
+  // Julia they said it would be easier to have the front and the two ends one instead of all of them
+  Serial.println(analogRead(0));
+  Serial.println(analogRead(1));
+  Serial.println(analogRead(2));
+  Serial.println(analogRead(3));
+  Serial.println(analogRead(4));
+  delay(500);
+  //Value = analogRead(IR);
+  //Serial.println(Value);
+  
+  DistFront = sonarFront.ping_cm();
+  DistRight = sonarRight.ping_cm();
+  DistLeft = sonarLeft.ping_cm();
+  Serial.println(DistFront);
+  Serial.println(DistRight);
+  Serial.println(DistLeft);
+
+  //algorithm for moving throughout the maze
+  //if the robot is in front of the candle, it stops and turns on the fan
+  //if there is no wall to the right of the robot, it will always turn right
+  //if there is a wall in front of the robot, it will stop, and turn right
+  //if there is a wall to the right and front of the robot, it will stop in front of the wall, and turn left
+  // if there is a wall to the left and right of the robot, it will go straight
+  
+  //if (Value == 900)
+  //{
+  //  stoprobot();
+    //turn on fan
+    //end program
+  //}
+  
+  if (DistFront <= 20)
+  {
+    stoprobot();
+    
+    if (DistRight >= 20)
+    {
+      right();
+    }
+    else
+    {
+      left();
+    }
+  }
+
+  else if (DistRight >= 20)
+  {
+    right();
+  }
+
+  else
+  {
+    straight();
+  }
+}
+
+//fix: straight in reverse
+void straight()
+{
+  digitalWrite(motor1A, LOW);
+  digitalWrite(motor1B, HIGH);
+  digitalWrite(motor2A, LOW);
+  digitalWrite(motor2B, HIGH);
+}
+void right()
+{
+  digitalWrite(motor1A, LOW);
+  digitalWrite(motor1B, HIGH);
+  digitalWrite(motor2A, HIGH);
+  digitalWrite(motor2B, LOW);
+}
+void left()
+{
+  digitalWrite(motor1A, HIGH);
+  digitalWrite(motor1B, LOW);
+  digitalWrite(motor2A, LOW);
+  digitalWrite(motor2B, HIGH);
+}
+void stoprobot()
+{
+  digitalWrite(motor1A, LOW);
+  digitalWrite(motor1B, LOW);
+  digitalWrite(motor2A, LOW);
+  digitalWrite(motor2B, LOW);
+  delay(1000);
+}
